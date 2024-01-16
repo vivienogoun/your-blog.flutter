@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:your_blog/pages/sign_up.dart';
+import 'package:your_blog/pages/sign_in.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -16,8 +18,9 @@ class _WelcomePageState extends State<WelcomePage> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
+        decoration: const BoxDecoration(
+          color: Colors.black12,
+          /*gradient: LinearGradient(
             colors: [
               Colors.white,
               Colors.deepOrange.shade200
@@ -26,10 +29,10 @@ class _WelcomePageState extends State<WelcomePage> {
             end: const FractionalOffset(0.0, 1.0),
             stops: const [0.0, 1.0],
             tileMode: TileMode.repeated,
-          )
+          )*/
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
           child: Column(
             children: [
               const Text(
@@ -42,7 +45,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
               //SizedBox(height: MediaQuery.of(context).size.height/6,),
               const Text(
-                "Don't worry, we mean it.",
+                "Don't worry, we mean it",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
@@ -50,14 +53,55 @@ class _WelcomePageState extends State<WelcomePage> {
                   letterSpacing: 2,
                 ),
               ),
-              const SizedBox(height: 50,),
+              const SizedBox(height: 60,),
               Image.asset("assets/graphics.png"),
-              const SizedBox(height: 50,),
-              boxContainer("assets/google.png", "Sign up with Google"),
-              const SizedBox(height: 20,),
-              boxContainer("assets/facebook.png", "Sign up with Facebook"),
-              const SizedBox(height: 20,),
-              boxContainer("assets/email.png", "Sign up with Email"),
+              const SizedBox(height: 60,),
+              OutlinedButton(
+                onPressed: () => {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SignInPage(),))
+                },
+                style: ButtonStyle(
+                  fixedSize: const MaterialStatePropertyAll<Size>(
+                      Size(270.0, 60.0)
+                  ),
+                  backgroundColor: const MaterialStatePropertyAll<Color>(Colors.white70),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+                child: const Text("Login", style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 20.0,
+                )),
+              ),
+              //boxContainer("assets/google.png", "Sign up with Google"),
+              const SizedBox(height: 30,),
+              const Text("New here ?"),
+              //boxContainer("assets/facebook.png", "Sign up with Facebook"),
+              const SizedBox(height: 10,),
+              FilledButton(
+                onPressed: () => {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SignUpPage(),))
+                },
+                style: ButtonStyle(
+                  fixedSize: const MaterialStatePropertyAll<Size>(
+                    Size(270.0, 60.0)
+                  ),
+                  backgroundColor: const MaterialStatePropertyAll<Color>(Colors.black87),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+                child: const Text("Register", style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
+                ),)
+              )
+              /*boxContainer("assets/email.png", "Sign up with Email"),
               const SizedBox(height: 20,),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -73,14 +117,14 @@ class _WelcomePageState extends State<WelcomePage> {
                     fontWeight: FontWeight.bold,
                   ))
                 ],
-              )
+              )*/
             ],
           ),
         ),
       ),
     );
   }
-  Widget boxContainer(String path, String text) {
+  /*Widget boxContainer(String path, String text) {
     return Container(
       height: 60,
       width: MediaQuery.of(context).size.width-125,
@@ -103,5 +147,5 @@ class _WelcomePageState extends State<WelcomePage> {
         )
       ),
     );
-  }
+  }*/
 }
