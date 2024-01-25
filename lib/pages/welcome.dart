@@ -31,63 +31,63 @@ class _WelcomePageState extends State<WelcomePage> {
             tileMode: TileMode.repeated,
           )*/
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
-          child: Column(
-            children: [
-              const Text(
-                "YourBlog",
-                style: TextStyle(
-                  fontSize: 38,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 2,
-                ),
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 40),
+          children: [
+            const Text(
+              "YourBlog",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 38,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 2,
               ),
-              //SizedBox(height: MediaQuery.of(context).size.height/6,),
-              const Text(
-                "Don't worry, we mean it",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                  letterSpacing: 2,
-                ),
+            ),
+            //SizedBox(height: MediaQuery.of(context).size.height/6,),
+            const Text(
+              "Don't worry, we mean it",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                letterSpacing: 2,
               ),
-              const SizedBox(height: 60,),
-              Image.asset("assets/graphics.png"),
-              const SizedBox(height: 60,),
-              OutlinedButton(
-                onPressed: () => {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SignInPage(),))
-                },
-                style: ButtonStyle(
-                  fixedSize: const MaterialStatePropertyAll<Size>(
-                      Size(270.0, 60.0)
+            ),
+            const SizedBox(height: 60,),
+            Image.asset("assets/graphics.png"),
+            const SizedBox(height: 60,),
+            OutlinedButton(
+              onPressed: () => {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SignInPage(),))
+              },
+              style: ButtonStyle(
+                fixedSize: const MaterialStatePropertyAll<Size>(
+                    Size(270.0, 60.0)
+                ),
+                backgroundColor: const MaterialStatePropertyAll<Color>(Colors.white70),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                  backgroundColor: const MaterialStatePropertyAll<Color>(Colors.white70),
-                  shape: MaterialStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
                 ),
-                child: const Text("Login", style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 20.0,
-                )),
               ),
-              //boxContainer("assets/google.png", "Sign up with Google"),
-              const SizedBox(height: 30,),
-              const Text("New here ?"),
-              //boxContainer("assets/facebook.png", "Sign up with Facebook"),
-              const SizedBox(height: 10,),
-              FilledButton(
+              child: const Text("Login", style: TextStyle(
+                color: Colors.black87,
+                fontSize: 20.0,
+              )),
+            ),
+            //boxContainer("assets/google.png", "Sign up with Google"),
+            const SizedBox(height: 30,),
+            const Text("New here ?", textAlign: TextAlign.center,),
+            //boxContainer("assets/facebook.png", "Sign up with Facebook"),
+            const SizedBox(height: 10,),
+            FilledButton(
                 onPressed: () => {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SignUpPage(),))
                 },
                 style: ButtonStyle(
                   fixedSize: const MaterialStatePropertyAll<Size>(
-                    Size(270.0, 60.0)
+                      Size(270.0, 60.0)
                   ),
                   backgroundColor: const MaterialStatePropertyAll<Color>(Colors.black87),
                   shape: MaterialStateProperty.all(
@@ -100,8 +100,8 @@ class _WelcomePageState extends State<WelcomePage> {
                   color: Colors.white,
                   fontSize: 20.0,
                 ),)
-              )
-              /*boxContainer("assets/email.png", "Sign up with Email"),
+            )
+            /*boxContainer("assets/email.png", "Sign up with Email"),
               const SizedBox(height: 20,),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -118,8 +118,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   ))
                 ],
               )*/
-            ],
-          ),
+          ],
         ),
       ),
     );
