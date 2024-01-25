@@ -7,7 +7,7 @@ part of 'profile.dart';
 // **************************************************************************
 
 ProfileModel _$ProfileModelFromJson(Map<String, dynamic> json) => ProfileModel(
-      username: json['username'] as String,
+      username: json['username'] as String?,
       name: json['name'] as String?,
       about: json['about'] as String?,
     );
