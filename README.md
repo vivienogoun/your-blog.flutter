@@ -1,16 +1,8 @@
-# your_blog
+# Your Blog
 
 A blog project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+APKs for different android processor architecture are available [here](https://drive.google.com/drive/folders/1tQWqwA8W-h52eQi45LXBLdqgQiCzuYk0?usp=sharing)
+The one for ARM64 processors (named app-arm64-v8a-release.apk) will work for most.
