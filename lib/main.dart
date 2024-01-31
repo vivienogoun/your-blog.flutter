@@ -1,7 +1,6 @@
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:your_blog/pages/home.dart';
 import 'package:your_blog/pages/welcome.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -29,17 +28,10 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     checkLogin();
   }
-  void getUserData() async {
-    Response response = await networkHandler.get("users/1");
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString("userData", response.body);
-    }
-  }
+
   void checkLogin() async {
-    String? token = await storage.read(key: "id");
-    if (token != null) {
-      getUserData();
+    String? userId = await storage.read(key: "userId");
+    if (userId != null) {
       setState(() {
         page = const HomePage();
       });

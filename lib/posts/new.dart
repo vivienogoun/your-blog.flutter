@@ -1,21 +1,23 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:your_blog/components/overlay_card.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:your_blog/components/base_container.dart';
+import 'package:your_blog/components/main-button.dart';
+import 'package:your_blog/components/post_preview.dart';
 import 'package:your_blog/models/post.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:your_blog/screens/home.dart';
 import 'package:your_blog/shared_prefs.dart';
 
 import '../network_handler.dart';
-import '../screens/posts.dart';
 
 class NewPost extends StatefulWidget {
-  const NewPost({super.key});
+  const NewPost({super.key, required this.edit, this.userId, this.post});
+  final bool edit;
+  final String? userId;
+  final PostModel? post;
 
   @override
   _NewPostState createState() => _NewPostState();
@@ -26,23 +28,35 @@ class _NewPostState extends State<NewPost> {
   NetworkHandler networkHandler = NetworkHandler();
   SharedPrefs prefs = SharedPrefs();
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
   bool loading = false;
   var logger = Logger();
-  final ImagePicker _picker = ImagePicker();
-  XFile? _imageFile;
+  quill.QuillController quillController = quill.QuillController.basic();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.edit) {
+      _titleController.text = widget.post!.postTitle;
+      quillController = quill.QuillController(
+        document: quill.Document.fromJson(
+          jsonDecode(
+            widget.post!.postContent,
+          ),
+        ),
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    Map<String, String> data;
     Map<String, dynamic> output;
     Response response;
-    PostModel newPost;
-    String localImagePath;
+    Map<String, dynamic> body;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xfff6f6f6),
         foregroundColor: Colors.black87,
         leading: IconButton(
           icon: const Icon(Icons.clear),
@@ -53,27 +67,12 @@ class _NewPostState extends State<NewPost> {
         actions: [
           TextButton(
             onPressed: () {
-              if(_imageFile?.path == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      "No image uploaded",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.red,
-                      ),
-                    ),
-                    backgroundColor: Colors.white,
-                  )
-                );
-              }
-              else if(_globalKey.currentState!.validate()) {
+              if(_globalKey.currentState!.validate()) {
                 showModalBottomSheet(
                   context: context,
-                  builder: ((builder) => OverlayCard(
-                    imageFile: _imageFile!,
+                  builder: ((builder) => PostPreview(
                     title: _titleController.text,
-                    content: _contentController.text,
+                    content: jsonEncode(quillController.document.toDelta().toJson()),
                   )),
                 );
               }
@@ -82,99 +81,93 @@ class _NewPostState extends State<NewPost> {
               "Preview",
               style: TextStyle(
                 fontSize: 16,
+                color: Colors.black
               ),
             ),
           ),
         ],
       ),
-      body: Form(
+      body: baseContainer(
+          context,
+          true,
+          const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+          Form(
         key: _globalKey,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(
-            vertical: 20,
-            horizontal: 20,
-          ),
+        child: Column(
           children: [
-            TextButton(
-              onPressed: () {
-                uploadImage();
-              },
+            titleInput(widget.edit),
+            const SizedBox(
+              height: 20,
+            ),
+            quill.QuillProvider(
+              configurations: quill.QuillConfigurations(
+                controller: quillController,
+                sharedConfigurations: const quill.QuillSharedConfigurations(
+                  locale: Locale('en'),
+                ),
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.file_upload_outlined),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text("Upload cover image"),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(_imageFile == null
-                    ? "No file chosen"
-                    : _imageFile!.name,
-                    style: const TextStyle(
-                      color: Colors.black87
+                  const quill.QuillToolbar(),
+                  quill.QuillEditor.basic(
+                    configurations: const quill.QuillEditorConfigurations(
+                      readOnly: false,
+                      padding: EdgeInsets.all(8),
+                      autoFocus: false,
+                      expands: false,
+                      scrollable: true,
+                      placeholder: "Content...",
                     ),
-                  )
+                    scrollController: ScrollController(),
+                    focusNode: FocusNode(),
+                  ),
                 ],
               ),
             ),
             const SizedBox(
-              height: 10,
-            ),
-            titleInput(),
-            const SizedBox(
-              height: 10,
-            ),
-            contentInput(),
-            const SizedBox(
               height: 20,
             ),
-            FilledButton(
-                onPressed: () async => {
+            mainButton(
+                context,
+                loading,
+                widget.edit ? 'Publish changes' : 'Publish',
+                () async => {
                   setState(() {
                     loading = true;
                   }),
-                  if(_imageFile?.path == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          "No image uploaded",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.red,
-                          ),
-                        ),
-                        backgroundColor: Colors.white,
-                      )
-                    ),
-                    setState(() {
-                      loading = false;
-                    }),
-                  }
-                  else if (_globalKey.currentState!.validate()) {
-                    localImagePath = await saveImage(_imageFile!),
-                    await prefs.save('localImagePath', localImagePath),
-                    newPost = PostModel(
-                      imageUrl: localImagePath,
-                      title: _titleController.text,
-                      content: _contentController.text
-                    ),
-                    response = await networkHandler.post("products/add", newPost.toJson()),
+                  if (_globalKey.currentState!.validate()) {
+                    body = widget.edit 
+                        ? {
+                          'postTitle': _titleController.text,
+                          'postContent': jsonEncode(quillController.document.toDelta().toJson()),
+                          'postImage': widget.post!.postImage,
+                          'categoryId': widget.post!.categoryId,
+                          'likes': widget.post!.likes
+                        } 
+                      : {
+                        'postTitle': _titleController.text,
+                        'postContent': jsonEncode(quillController.document.toDelta().toJson()),
+                        'postImage': '',
+                        'userId': widget.userId!,
+                        'categoryId': 'PiEB7'
+                      },
+                    response = widget.edit 
+                        ? await networkHandler.post('/posts/updatepost.php', body, {
+                          'postId': widget.post!.postId
+                        })
+                        : await networkHandler.post("/posts/post.php", body, {}),
                     output = json.decode(response.body),
-                    if (response.statusCode == 200 || response.statusCode == 201) {
-                      logger.i(output["id"]),
+                    if (response.statusCode == 200) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(output["message"]),
+                          )
+                      ),
                       setState(() {
                         loading = false;
                       }),
-                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => PostsScreen()), (route) => false)
+                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false)
                     } else {
-                      logger.i(output["error"]),
                       setState(() {
                         loading = false;
                       })
@@ -184,68 +177,26 @@ class _NewPostState extends State<NewPost> {
                       loading = false;
                     })
                   }
-                },
-                style: ButtonStyle(
-                  fixedSize: MaterialStatePropertyAll<Size>(
-                      Size(MediaQuery.of(context).size.width, 60.0)
-                  ),
-                  backgroundColor: const MaterialStatePropertyAll<Color>(Colors.black87),
-                  shape: MaterialStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                ),
-                child: loading ? const CircularProgressIndicator(
-                  color: Colors.white,
-                ) : const Text("Save Draft", style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                ),)
-            )
+                }
+            ),
           ],
         ),
-      ),
+      ))
     );
   }
 
-  void uploadImage() async {
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _imageFile = file;
-    });
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-
-    return directory.path;
-  }
-
-  Future<String> saveImage(XFile image) async {
-    final String directoryPath = await _localPath;
-    final String path = directoryPath + image.name;
-    await image.saveTo(path);
-    return path;
-  }
-
-  Widget titleInput() {
+  Widget titleInput(bool edit) {
     return Column(
       children: [
         TextFormField(
+          readOnly: edit ? true : false,
           controller: _titleController,
           validator: (value) {
             if (value!.isEmpty) return "Title can't be empty";
             return null;
           },
           decoration: const InputDecoration(
-            border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black54,
-                  width: 2,
-                )
-            ),
-            focusedBorder: UnderlineInputBorder(
+            border: UnderlineInputBorder(
                 borderSide: BorderSide(
                   color: Colors.black,
                   width: 2,
@@ -254,36 +205,6 @@ class _NewPostState extends State<NewPost> {
             labelText: "Title",
           ),
           maxLength: 50,
-          maxLines: null,
-        )
-      ],
-    );
-  }
-
-  Widget contentInput() {
-    return Column(
-      children: [
-        TextFormField(
-          controller: _contentController,
-          validator: (value) {
-            if (value!.isEmpty) return "Content can't be empty";
-            return null;
-          },
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black54,
-                  width: 2,
-                )
-            ),
-            focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black,
-                  width: 2,
-                )
-            ),
-            labelText: "Content",
-          ),
           maxLines: null,
         )
       ],
