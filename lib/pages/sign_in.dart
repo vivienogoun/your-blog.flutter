@@ -94,6 +94,11 @@ class _SignInPageState extends State<SignInPage> {
                             }),
                             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomePage()), (route) => false)
                           } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(output["error"]),
+                                )
+                            ),
                             setState(() {
                               loading = false;
                             })
