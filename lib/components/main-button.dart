@@ -16,6 +16,7 @@ Widget mainButton(BuildContext context, bool loading, String text, void Function
       ),
       child: loading ? const CircularProgressIndicator(
         color: Colors.white,
+        strokeAlign: -2.0,
       ) : Text(
         text,
         style: const TextStyle(

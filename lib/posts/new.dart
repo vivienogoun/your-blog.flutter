@@ -9,7 +9,6 @@ import 'package:your_blog/components/main-button.dart';
 import 'package:your_blog/components/post_preview.dart';
 import 'package:your_blog/models/post.dart';
 import 'package:your_blog/pages/home.dart';
-import 'package:your_blog/screens/home.dart';
 import 'package:your_blog/shared_prefs.dart';
 
 import '../network_handler.dart';
@@ -152,13 +151,22 @@ class _NewPostState extends State<NewPost> {
                         'userId': widget.userId!,
                         'categoryId': 'PiEB7'
                       },
-                    response = widget.edit 
+                    response = widget.edit
                         ? await networkHandler.post('/posts/updatepost.php', body, {
                           'postId': widget.post!.postId
                         })
                         : await networkHandler.post("/posts/post.php", body, {}),
-                    output = json.decode(response.body),
-                    if (response.statusCode == 200) {
+                    if (response.statusCode == 500) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Something went wrong. Please retry'),
+                          )
+                      ),
+                      setState(() {
+                        loading = false;
+                      }),
+                    } else if (response.statusCode == 200) {
+                      output = json.decode(response.body),
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(output["message"]),
