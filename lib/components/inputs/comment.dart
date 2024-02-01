@@ -16,7 +16,7 @@ Widget commentInput(TextEditingController controller, String hintText, void Func
         suffixIcon: IconButton(
           icon: const Icon(
             Icons.send,
-            color: Colors.green,
+            color: Colors.blue,
           ),
           onPressed: onPressed,
         ),

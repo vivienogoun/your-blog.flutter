@@ -8,6 +8,7 @@ import 'package:your_blog/components/base_container.dart';
 import 'package:your_blog/components/main-button.dart';
 import 'package:your_blog/components/post_preview.dart';
 import 'package:your_blog/models/post.dart';
+import 'package:your_blog/pages/home.dart';
 import 'package:your_blog/screens/home.dart';
 import 'package:your_blog/shared_prefs.dart';
 
@@ -166,7 +167,7 @@ class _NewPostState extends State<NewPost> {
                       setState(() {
                         loading = false;
                       }),
-                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false)
+                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomePage()), (route) => false)
                     } else {
                       setState(() {
                         loading = false;

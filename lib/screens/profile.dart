@@ -70,18 +70,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     Map<String, dynamic> body;
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.black87,
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => NewPost(
-                  edit: false,
-                  userId: user.userId,
-                ))
-            );
-          },
-          child: const Icon(Icons.edit_note, size: 32,)
-      ),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xfff6f6f6),
@@ -183,7 +171,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           })
                         }
                       }
-                  )
+                  ),
+                  const SizedBox(
+                    height: 20.0,
+                  ),
                 ],
               )
           )
@@ -227,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           const Text(
-            "Choose profile photo",
+            "Choose profile avatar",
             style: TextStyle(
               fontSize: 18,
             ),

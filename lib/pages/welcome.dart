@@ -36,7 +36,7 @@ class _WelcomePageState extends State<WelcomePage> {
             ),
           ),
           const Text(
-            "YourBlog",
+            "Your Blog",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 38,

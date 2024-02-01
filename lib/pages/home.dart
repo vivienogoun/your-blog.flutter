@@ -12,19 +12,52 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int currentIndex = 0;
-  List<Widget> widgets = [
-    const HomeScreen(),
-    const BookmarksScreen(),
-    const PostsScreen(),
-    const ProfileScreen(),
+  int _selectedIndex = 0;
+  static const List<Widget> _pages = [
+    HomeScreen(),
+    BookmarksScreen(),
+    PostsScreen(),
+    ProfileScreen(),
   ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: BottomNavigationBar(
+        iconSize: 25.0,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.bookmark),
+              label: 'Favorites',
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.article),
+              label: 'My Posts'
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile'
+          ),
+        ],
+      ), /*BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 12,
         child: SizedBox(
@@ -35,6 +68,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
+                  tooltip: 'Home',
                   onPressed: () {
                     setState(() {
                       currentIndex = 0;
@@ -54,9 +88,6 @@ class _HomePageState extends State<HomePage> {
                   iconSize: 30,
                   color: currentIndex == 1 ? Colors.black87 : Colors.black26,
                 ),
-                /*const SizedBox(
-                  width: 30,
-                ),*/
                 IconButton(
                   onPressed: () {
                     setState(() {
@@ -81,8 +112,8 @@ class _HomePageState extends State<HomePage> {
             ),
           )
         ),
-      ),
-      body: widgets[currentIndex]
+      ),*/
+      body: _pages.elementAt(_selectedIndex)
     );
   }
 }

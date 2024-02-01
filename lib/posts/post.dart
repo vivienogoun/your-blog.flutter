@@ -31,6 +31,7 @@ class _PostViewState extends State<PostView> {
   var log = Logger();
   bool liked = false;
   bool bookmarked = false;
+  int postNoComments = 0;
   PostModel post = PostModel(categoryId: "", userId: "", postTitle: "", postContent: "", postImage: "");
   UserModel author = UserModel(email: "", fullName: "", password: "");
   UserModel user = UserModel(email: "", fullName: "", password: "");
@@ -69,6 +70,15 @@ class _PostViewState extends State<PostView> {
     });
     author = UserModel.fromJson(json.decode(response3.body));
 
+    Response response4 = await network.get('/posts/comments.php', {
+      'postId': widget.postId
+    });
+    int noComments = 0;
+    if (response4.statusCode == 200) {
+      noComments = (json.decode(response4.body) as List).length;
+    }
+
+    postNoComments = noComments;
     bookmarked = responseUser.favoritesPosts == null
         ? false
         : responseUser.favoritesPosts!.contains(widget.postId);
@@ -92,6 +102,57 @@ class _PostViewState extends State<PostView> {
           },
         ),
         actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                  context, 
+                  MaterialPageRoute(
+                      builder: (context) => CommentsPage(
+                          postId: widget.postId
+                      )
+                  )
+              );
+            },
+            child: Row(
+              children: [
+                Text(
+                  '$postNoComments',
+                  style: const TextStyle(
+                    color: Colors.black
+                  ),
+                ),
+                const SizedBox(
+                  width: 2.5,
+                ),
+                const Icon(Icons.comment, color: Colors.black,)
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () async {
+              Map<String, dynamic> body = {
+                "categoryId": "PiEB7",
+                "postTitle": post.postTitle,
+                "postContent": post.postContent,
+                "postImage": post.postImage,
+                "likes": liked ? (post.likes! - 1) : (post.likes! + 1)
+              };
+              await network.post("/posts/updatepost.php", body, {
+                "postId": post.postId,
+              });
+              Response response = await network.get("/posts/post.php", {
+                "postId": widget.postId
+              });
+              setState(() {
+                post = PostModel.fromJson(json.decode(response.body));
+                liked = !liked;
+              });
+            },
+            icon: Icon(
+              Icons.thumb_up_sharp,
+              color: liked ? Colors.blue : Colors.black,
+            ),
+          ),
           IconButton(
             onPressed: () async {
               Map<String, dynamic> body = {
@@ -122,44 +183,6 @@ class _PostViewState extends State<PostView> {
               Icons.bookmark_add,
               color: bookmarked ? Colors.blue : Colors.black,
             ),
-          ),
-          IconButton(
-            onPressed: () async {
-              Map<String, dynamic> body = {
-                "categoryId": "PiEB7",
-                "postTitle": post.postTitle,
-                "postContent": post.postContent,
-                "postImage": post.postImage,
-                "likes": liked ? (post.likes! - 1) : (post.likes! + 1)
-              };
-              await network.post("/posts/updatepost.php", body, {
-                "postId": post.postId,
-              });
-              Response response = await network.get("/posts/post.php", {
-                "postId": widget.postId
-              });
-              setState(() {
-                post = PostModel.fromJson(json.decode(response.body));
-                liked = !liked;
-              });
-            },
-            icon: Icon(
-              Icons.thumb_up_sharp,
-              color: liked ? Colors.blue : Colors.black,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                  context, 
-                  MaterialPageRoute(
-                      builder: (context) => CommentsPage(
-                          postId: widget.postId
-                      )
-                  )
-              );
-            },
-            icon: const Icon(Icons.comment),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:your_blog/components/main-button.dart';
 import 'package:your_blog/posts/post.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
@@ -18,6 +19,12 @@ class FavoritePostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String postContentString = quill.Document.fromJson(
+      jsonDecode(
+        postWithUser.post.postContent,
+      ),
+    ).toPlainText();
+
     return Container(
       padding: const EdgeInsets.symmetric(
         vertical: 10.0,
@@ -84,63 +91,23 @@ class FavoritePostCard extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          quill.QuillProvider(
-            configurations: quill.QuillConfigurations(
-              controller: quill.QuillController(
-                document: quill.Document.fromJson(
-                  jsonDecode(
-                    postWithUser.post.postContent,
-                  ),
-                ),
-                selection: const TextSelection.collapsed(offset: 0),
-              ),
-              sharedConfigurations: const quill.QuillSharedConfigurations(
-                locale: Locale('en'),
-              ),
-            ),
-            child: quill.QuillEditor.basic(
-              configurations: const quill.QuillEditorConfigurations(
-                  readOnly: true,
-                  autoFocus: false,
-                  expands: false,
-                  scrollable: true,
-                  maxHeight: 67.0,
-                  showCursor: false
-              ),
-              scrollController: ScrollController(),
-              focusNode: FocusNode(),
-            ),
+          Text(postContentString.length > 125
+              ? '${postContentString.substring(0, 125)}...'
+              : postContentString,
           ),
           const SizedBox(
             height: 10,
           ),
-          FilledButton(
-              onPressed: () => {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PostView(
-                          postId: postWithUser.post.postId!,
-                          authorId: postWithUser.post.userId,
-                        )
-                    ))
-              },
-              style: ButtonStyle(
-                fixedSize: MaterialStatePropertyAll<Size>(
-                    Size(MediaQuery.of(context).size.width, 45.0)
-                ),
-                backgroundColor: const MaterialStatePropertyAll<Color>(Colors.black87),
-                shape: MaterialStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-              ),
-              child: const Text("Read now", style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.0,
-              ),)
-          )
+          mainButton(context, false, 'Read now', () => {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => PostView(
+                      postId: postWithUser.post.postId!,
+                      authorId: postWithUser.post.userId,
+                    )
+                ))
+          }),
         ],
       ),
     );

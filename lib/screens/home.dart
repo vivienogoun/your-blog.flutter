@@ -125,7 +125,13 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Notifications are not implemented yet'),
+                  )
+              );
+            },
           ),
         ],
         bottom: PreferredSize(

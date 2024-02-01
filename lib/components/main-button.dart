@@ -5,7 +5,7 @@ Widget mainButton(BuildContext context, bool loading, String text, void Function
       onPressed: onPressed,
       style: ButtonStyle(
         fixedSize: MaterialStatePropertyAll<Size>(
-            Size(MediaQuery.of(context).size.width, 50.0)
+            Size(MediaQuery.of(context).size.width, 45.0)
         ),
         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.black87),
         shape: MaterialStateProperty.all(
@@ -20,7 +20,7 @@ Widget mainButton(BuildContext context, bool loading, String text, void Function
         text,
         style: const TextStyle(
         color: Colors.white,
-        fontSize: 18.0,
+        fontSize: 16.0,
       ),)
   );
 }

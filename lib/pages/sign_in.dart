@@ -55,17 +55,6 @@ class _SignInPageState extends State<SignInPage> {
                   emailInput(_emailController),
                   const SizedBox(height: 20,),
                   PasswordInput(controller: _passwordController, update: false,),
-                  /*TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      "Forgot password ?",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),*/
                   const SizedBox(
                     height: 20,
                   ),
@@ -84,7 +73,16 @@ class _SignInPageState extends State<SignInPage> {
                           },
                           response = await networkHandler.post("/users/login.php", body, {}),
                           output = json.decode(response.body),
-                          if (response.statusCode == 200) {
+                          if (response.statusCode == 500) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Something went wrong. Try again"),
+                                )
+                            ),
+                            setState(() {
+                              loading = false;
+                            })
+                          } else if (response.statusCode == 200) {
                             ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(output["message"]),
@@ -96,11 +94,6 @@ class _SignInPageState extends State<SignInPage> {
                             }),
                             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomePage()), (route) => false)
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(output["error"]),
-                                )
-                            ),
                             setState(() {
                               loading = false;
                             })

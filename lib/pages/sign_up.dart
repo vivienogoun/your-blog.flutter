@@ -78,7 +78,16 @@ class _SignUpPageState extends State<SignUpPage> {
                             "password": _passwordController.text,
                           },
                           response = await networkHandler.post("/users/register.php", body, {}),
-                          if (response.body.contains("SQLSTATE")) {
+                          if (response.statusCode == 500) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Something went wrong. Try again"),
+                                )
+                            ),
+                            setState(() {
+                              loading = false;
+                            })
+                          } else if (response.body.contains("SQLSTATE")) {
                             ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text("Email already used"),
@@ -100,7 +109,6 @@ class _SignUpPageState extends State<SignUpPage> {
                               }),
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const SignInPage()))
                             } else {
-                              log.i("signUpError: ${output["error"]}"),
                               setState(() {
                                 loading = false;
                               })

@@ -21,7 +21,7 @@ class NetworkHandler {
   Future<http.Response> get(String url, Map<String, dynamic>? params) async {
     var response = await http.get(
       urlToUri(url, params),
-    ).timeout(const Duration(seconds: 10)).catchError((e) {
+    ).timeout(const Duration(seconds: 15)).catchError((e) {
       http.Response errorResponse = http.Response('', 500);
       return errorResponse;
     });
@@ -35,7 +35,10 @@ class NetworkHandler {
         "Content-Type": "application/json",
       },
       body: json.encode(body)
-    );
+    ).timeout(const Duration(seconds: 15)).catchError((e) {
+      http.Response errorResponse = http.Response('', 500);
+      return errorResponse;
+    });
     return response;
   }
 }
