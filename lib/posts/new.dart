@@ -2,14 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:your_blog/components/base_container.dart';
 import 'package:your_blog/components/main-button.dart';
 import 'package:your_blog/components/post_preview.dart';
 import 'package:your_blog/models/post.dart';
 import 'package:your_blog/pages/home.dart';
-import 'package:your_blog/shared_prefs.dart';
 
 import '../network_handler.dart';
 
@@ -20,16 +18,14 @@ class NewPost extends StatefulWidget {
   final PostModel? post;
 
   @override
-  _NewPostState createState() => _NewPostState();
+  State<NewPost> createState() => _NewPostState();
 }
 
 class _NewPostState extends State<NewPost> {
   final _globalKey = GlobalKey<FormState>();
   NetworkHandler networkHandler = NetworkHandler();
-  SharedPrefs prefs = SharedPrefs();
   final TextEditingController _titleController = TextEditingController();
   bool loading = false;
-  var logger = Logger();
   quill.QuillController quillController = quill.QuillController.basic();
 
   @override
@@ -87,76 +83,70 @@ class _NewPostState extends State<NewPost> {
           ),
         ],
       ),
-      body: baseContainer(
-          context,
-          true,
-          const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-          Form(
-        key: _globalKey,
-        child: Column(
-          children: [
-            titleInput(widget.edit),
-            const SizedBox(
-              height: 20,
-            ),
-            quill.QuillProvider(
-              configurations: quill.QuillConfigurations(
-                controller: quillController,
-                sharedConfigurations: const quill.QuillSharedConfigurations(
-                  locale: Locale('en'),
+      body: BaseContainer(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        white: true,
+        child: Form(
+          key: _globalKey,
+          child: Column(
+            children: [
+              titleInput(widget.edit),
+              const SizedBox(height: 20),
+              quill.QuillProvider(
+                configurations: quill.QuillConfigurations(
+                  controller: quillController,
+                  sharedConfigurations: const quill.QuillSharedConfigurations(
+                    locale: Locale('en'),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const quill.QuillToolbar(),
+                    quill.QuillEditor.basic(
+                      configurations: const quill.QuillEditorConfigurations(
+                        readOnly: false,
+                        padding: EdgeInsets.all(8),
+                        autoFocus: false,
+                        expands: false,
+                        scrollable: true,
+                        placeholder: "Content...",
+                      ),
+                      scrollController: ScrollController(),
+                      focusNode: FocusNode(),
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                children: [
-                  const quill.QuillToolbar(),
-                  quill.QuillEditor.basic(
-                    configurations: const quill.QuillEditorConfigurations(
-                      readOnly: false,
-                      padding: EdgeInsets.all(8),
-                      autoFocus: false,
-                      expands: false,
-                      scrollable: true,
-                      placeholder: "Content...",
-                    ),
-                    scrollController: ScrollController(),
-                    focusNode: FocusNode(),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            mainButton(
-                context,
-                loading,
-                widget.edit ? 'Publish changes' : 'Publish',
-                () async => {
+              const SizedBox(height: 20),
+              MainButton(
+                text: widget.edit ? 'Publish changes' : 'Publish',
+                loading: loading,
+                onPressed: () async => {
                   setState(() {
                     loading = true;
                   }),
                   if (_globalKey.currentState!.validate()) {
-                    body = widget.edit 
+                    body = widget.edit
                         ? {
-                          'postTitle': _titleController.text,
-                          'postContent': jsonEncode(quillController.document.toDelta().toJson()),
-                          'postImage': widget.post!.postImage,
-                          'categoryId': widget.post!.categoryId,
-                          'likes': widget.post!.likes
-                        } 
-                      : {
-                        'postTitle': _titleController.text,
-                        'postContent': jsonEncode(quillController.document.toDelta().toJson()),
-                        'postImage': '',
-                        'userId': widget.userId!,
-                        'categoryId': 'PiEB7'
-                      },
+                      'postTitle': _titleController.text,
+                      'postContent': jsonEncode(quillController.document.toDelta().toJson()),
+                      'postImage': widget.post!.postImage,
+                      'categoryId': widget.post!.categoryId,
+                      'likes': widget.post!.likes
+                    }
+                        : {
+                      'postTitle': _titleController.text,
+                      'postContent': jsonEncode(quillController.document.toDelta().toJson()),
+                      'postImage': '',
+                      'userId': widget.userId!,
+                      'categoryId': 'PiEB7'
+                    },
                     response = widget.edit
                         ? await networkHandler.post('/posts/updatepost.php', body, {
-                          'postId': widget.post!.postId
-                        })
+                      'postId': widget.post!.postId
+                    })
                         : await networkHandler.post("/posts/post.php", body, {}),
-                    if (response.statusCode == 500) {
+                    if (response.statusCode == 500 && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Something went wrong. Please retry'),
@@ -165,7 +155,7 @@ class _NewPostState extends State<NewPost> {
                       setState(() {
                         loading = false;
                       }),
-                    } else if (response.statusCode == 200) {
+                    } else if (response.statusCode == 200 && context.mounted) {
                       output = json.decode(response.body),
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -175,7 +165,10 @@ class _NewPostState extends State<NewPost> {
                       setState(() {
                         loading = false;
                       }),
-                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomePage()), (route) => false)
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomePage()),
+                        (route) => false)
                     } else {
                       setState(() {
                         loading = false;
@@ -186,11 +179,12 @@ class _NewPostState extends State<NewPost> {
                       loading = false;
                     })
                   }
-                }
-            ),
-          ],
+                },
+              ),
+            ],
+          )
         ),
-      ))
+      )
     );
   }
 

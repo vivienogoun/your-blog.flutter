@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:your_blog/components/base_container.dart';
 import 'package:your_blog/components/inputs/bio.dart';
 import 'package:your_blog/components/inputs/email.dart';
@@ -13,13 +12,12 @@ import 'package:your_blog/models/user.dart';
 
 import '../components/inputs/fullname.dart';
 import '../network_handler.dart';
-import '../posts/new.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -33,7 +31,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final storage = const FlutterSecureStorage();
   bool dataLoaded = false;
   bool serverError = false;
-  var log = Logger();
   UserModel user = UserModel(email: "", fullName: "", password: "");
   String? profilePath;
 
@@ -99,85 +96,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: CircularProgressIndicator(
           color: Colors.black54,
         ),
-      ) : baseContainer(context, true,
-          const EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
-          Form(
-              key: _globalKey,
-              child: Column(
-                children: [
-                  profileImage(),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  fullnameInput(_fullnameController),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  emailInput(_emailController),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  PasswordInput(controller: _passwordController, update: true,),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  bioInput(_bioController),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  mainButton(
-                      context,
-                      loading,
-                      "Save changes",
-                      () async => {
+      ) : BaseContainer(
+        padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
+        white: true,
+        child: Form(
+            key: _globalKey,
+            child: Column(
+              children: [
+                profileImage(),
+                const SizedBox(
+                  height: 20,
+                ),
+                fullnameInput(_fullnameController),
+                const SizedBox(
+                  height: 20,
+                ),
+                emailInput(_emailController),
+                const SizedBox(
+                  height: 20,
+                ),
+                PasswordInput(controller: _passwordController, update: true,),
+                const SizedBox(
+                  height: 20,
+                ),
+                bioInput(_bioController),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                MainButton(
+                  text: 'Save changes',
+                  loading: loading,
+                  onPressed: () async => {
+                    setState(() {
+                      loading = true;
+                    }),
+                    if (_globalKey.currentState!.validate()) {
+                      body = {
+                        "email": _emailController.text,
+                        "fullName": _fullnameController.text,
+                        "username": user.username,
+                        "password": _passwordController.text == ""
+                            ? user.password
+                            : _passwordController.text,
+                        "phoneNumber": user.phoneNumber,
+                        "avatarUrl": profilePath,
+                        "bio": _bioController.text,
+                        "favoritesPosts": user.favoritesPosts,
+                        "followers": user.followers,
+                      },
+                      response = await networkHandler.post("/users/updateuser.php", body, {
+                        "userId": user.userId
+                      }),
+                      output = json.decode(response.body),
+                      if (response.statusCode == 200 && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(output["message"]),
+                            )
+                        ),
                         setState(() {
-                          loading = true;
+                          loading = false;
                         }),
-                        if (_globalKey.currentState!.validate()) {
-                          body = {
-                            "email": _emailController.text,
-                            "fullName": _fullnameController.text,
-                            "username": user.username,
-                            "password": _passwordController.text == ""
-                                ? user.password
-                                : _passwordController.text,
-                            "phoneNumber": user.phoneNumber,
-                            "avatarUrl": profilePath,
-                            "bio": _bioController.text,
-                            "favoritesPosts": user.favoritesPosts,
-                            "followers": user.followers,
-                          },
-                          response = await networkHandler.post("/users/updateuser.php", body, {
-                            "userId": user.userId
-                          }),
-                          output = json.decode(response.body),
-                          if (response.statusCode == 200) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(output["message"]),
-                                )
-                            ),
-                            setState(() {
-                              loading = false;
-                            }),
-                          } else {
-                            setState(() {
-                              loading = false;
-                            })
-                          },
-                        } else {
-                          setState(() {
-                            loading = false;
-                          })
-                        }
-                      }
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                ],
-              )
-          )
+                      } else {
+                        setState(() {
+                          loading = false;
+                        })
+                      },
+                    } else {
+                      setState(() {
+                        loading = false;
+                      })
+                    }
+                  },
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+              ],
+            )
+        ),
       )
     );
   }

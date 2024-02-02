@@ -3,12 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:your_blog/components/base_container.dart';
 import 'package:your_blog/components/inputs/search.dart';
 import 'package:your_blog/pages/welcome.dart';
 
-import '../components/post_overview.dart';
+import '../components/cards/post_overview.dart';
 import '../models/post.dart';
 import '../models/user.dart';
 import '../network_handler.dart';
@@ -19,7 +18,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -28,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
   NetworkHandler networkHandler = NetworkHandler();
   List<PostWithUser> allPosts = [];
   List<PostWithUser> postsWithUsers = [];
-  var log = Logger();
   bool dataLoaded = false;
   bool serverError = false;
 
@@ -185,29 +183,33 @@ class _HomeScreenState extends State<HomeScreen> {
         child: CircularProgressIndicator(
           color: Colors.black54,
         ),
-      ) : baseContainer(
-          context,
-          false,
-          const EdgeInsets.symmetric(
-            vertical: 20.0,
-            horizontal: 15.0,
-          ),
-          Column(
-            children: postsWithUsers.map((postWithUser) => Column(
-              children: [
-                PostOverview(postWithUser: postWithUser,),
-                const SizedBox(
-                  height: 20.0,
-                )
-              ],
-            )).toList(),
-          )
-      ),
+      ) : BaseContainer(
+        padding: const EdgeInsets.symmetric(
+          vertical: 20.0,
+          horizontal: 15.0,
+        ),
+        white: false,
+        child: Column(
+          children: postsWithUsers.map((postWithUser) => Column(
+            children: [
+              PostOverview(postWithUser: postWithUser,),
+              const SizedBox(
+                height: 20.0,
+              )
+            ],
+          )).toList(),
+        ),
+      )
     );
   }
   
   void logout() async {
     await storage.delete(key: "user");
-    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const WelcomePage()), (route) => false);
+    if (context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const WelcomePage()),
+        (route) => false
+      );
+    }
   }
 }

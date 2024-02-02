@@ -137,16 +137,20 @@ class SelfPostCard extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          mainButton(context, false, 'View as guest', () => {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => PostView(
-                      postId: post.post.postId!,
-                      authorId: post.post.userId,
-                    )
-                ))
-          }),
+          MainButton(
+            text: 'View as guest',
+            loading: false,
+            onPressed: () => {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => PostView(
+                        postId: post.post.postId!,
+                        authorId: post.post.userId,
+                      )
+                  ))
+            },
+          )
         ],
       ),
     );

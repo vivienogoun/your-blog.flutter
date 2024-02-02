@@ -5,8 +5,8 @@ import 'package:your_blog/components/main-button.dart';
 import 'package:your_blog/posts/post.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
-import '../utils/functions.dart';
-import '../utils/types.dart';
+import '../../utils/functions.dart';
+import '../../utils/types.dart';
 
 class PostOverview extends StatelessWidget {
   const PostOverview({
@@ -52,7 +52,7 @@ class PostOverview extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 15.0,
-                    backgroundImage: postWithUser.user.avatarUrl == null || postWithUser.user.avatarUrl!.endsWith("png")
+                    backgroundImage: postWithUser.user.avatarUrl == null
                         ? const AssetImage("assets/profiles/0.jpg")
                         : AssetImage(postWithUser.user.avatarUrl!),
                   ),
@@ -88,16 +88,18 @@ class PostOverview extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          mainButton(context, false, 'Read more', () => {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => PostView(
-                      postId: postWithUser.post.postId!,
-                      authorId: postWithUser.post.userId,
-                    )
-                ))
-          }),
+          MainButton(
+            text: 'Read more',
+            loading: false,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PostView(
+                  postId: postWithUser.post.postId!,
+                  authorId: postWithUser.post.userId,
+                )
+              )),
+          )
         ],
       ),
     );

@@ -54,7 +54,7 @@ class FavoritePostCard extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 15.0,
-                    backgroundImage: postWithUser.user.avatarUrl == null || postWithUser.user.avatarUrl!.endsWith("png")
+                    backgroundImage: postWithUser.user.avatarUrl == null
                         ? const AssetImage("assets/profiles/0.jpg")
                         : AssetImage(postWithUser.user.avatarUrl!),
                   ),
@@ -98,16 +98,20 @@ class FavoritePostCard extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          mainButton(context, false, 'Read now', () => {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => PostView(
-                      postId: postWithUser.post.postId!,
-                      authorId: postWithUser.post.userId,
-                    )
-                ))
-          }),
+          MainButton(
+            text: 'Read now',
+            loading: false,
+            onPressed: () => {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => PostView(
+                        postId: postWithUser.post.postId!,
+                        authorId: postWithUser.post.userId,
+                      )
+                  ))
+            },
+          ),
         ],
       ),
     );

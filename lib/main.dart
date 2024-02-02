@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:your_blog/pages/home.dart';
 import 'package:your_blog/pages/welcome.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -14,14 +13,13 @@ class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
- _MyAppState createState() => _MyAppState();
+ State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   Widget page = const WelcomePage();
   final storage = const FlutterSecureStorage();
   NetworkHandler networkHandler = NetworkHandler();
-  var log = Logger();
 
   @override
   void initState() {

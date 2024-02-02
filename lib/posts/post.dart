@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:your_blog/models/post.dart';
 import 'package:your_blog/models/user.dart';
 import 'package:your_blog/network_handler.dart';
@@ -22,13 +21,12 @@ class PostView extends StatefulWidget {
   final String authorId;
 
   @override
-  _PostViewState createState() => _PostViewState();
+  State<PostView> createState() => _PostViewState();
 }
 
 class _PostViewState extends State<PostView> {
   final storage = const FlutterSecureStorage();
   NetworkHandler network = NetworkHandler();
-  var log = Logger();
   bool liked = false;
   bool bookmarked = false;
   int postNoComments = 0;

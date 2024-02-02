@@ -1,13 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 
 class NetworkHandler {
   String baseUrl = "your-blog12fp3hbur1.000webhostapp.com";
-  var logger = Logger();
-  FlutterSecureStorage storage = const FlutterSecureStorage();
 
   Uri urlToUri(String url, Map<String, dynamic>? params) {
     return Uri(

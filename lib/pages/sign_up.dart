@@ -1,10 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
-import 'package:your_blog/components/base_container.dart';
 import 'package:your_blog/components/inputs/fullname.dart';
 import 'package:your_blog/components/inputs/password.dart';
 import 'package:your_blog/components/main-button.dart';
@@ -17,7 +14,7 @@ class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
   @override
-  _SignUpPageState createState() => _SignUpPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
 class _SignUpPageState extends State<SignUpPage> {
@@ -28,8 +25,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool loading = false;
-  final storage = const FlutterSecureStorage();
-  var log = Logger();
 
   @override
   Widget build(BuildContext context) {
@@ -63,63 +58,65 @@ class _SignUpPageState extends State<SignUpPage> {
                   const SizedBox(
                     height: 20,
                   ),
-                  mainButton(
-                      context,
-                      loading,
-                      "Sign Up",
-                          () async => {
-                        setState(() {
-                          loading = true;
-                        }),
-                        if (_globalKey.currentState!.validate()) {
-                          body = {
-                            "email": _emailController.text,
-                            "fullName": _fullnameController.text,
-                            "password": _passwordController.text,
-                          },
-                          response = await networkHandler.post("/users/register.php", body, {}),
-                          if (response.statusCode == 500) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Something went wrong. Try again"),
-                                )
-                            ),
-                            setState(() {
-                              loading = false;
-                            })
-                          } else if (response.body.contains("SQLSTATE")) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Email already used"),
-                                )
-                            ),
-                            setState(() {
-                              loading = false;
-                            })
-                          } else {
-                            output = json.decode(response.body),
-                            if (response.statusCode == 200) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(output["message"]),
-                                  )
-                              ),
-                              setState(() {
-                                loading = false;
-                              }),
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const SignInPage()))
-                            } else {
-                              setState(() {
-                                loading = false;
-                              })
-                            },
-                          }
-                        } else {
+                  MainButton(
+                    text: 'Sign Up',
+                    loading: loading,
+                    onPressed: () async => {
+                      setState(() {
+                        loading = true;
+                      }),
+                      if (_globalKey.currentState!.validate()) {
+                        body = {
+                          "email": _emailController.text,
+                          "fullName": _fullnameController.text,
+                          "password": _passwordController.text,
+                        },
+                        response = await networkHandler.post("/users/register.php", body, {}),
+                        if (response.statusCode == 500 && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Something went wrong. Try again"),
+                              )
+                          ),
                           setState(() {
                             loading = false;
                           })
+                        } else if (response.body.contains("SQLSTATE") && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Email already used"),
+                              )
+                          ),
+                          setState(() {
+                            loading = false;
+                          })
+                        } else {
+                          output = json.decode(response.body),
+                          if (response.statusCode == 200 && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(output["message"]),
+                                )
+                            ),
+                            setState(() {
+                              loading = false;
+                            }),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SignInPage())
+                            )
+                          } else {
+                            setState(() {
+                              loading = false;
+                            })
+                          },
                         }
+                      } else {
+                        setState(() {
+                          loading = false;
+                        })
                       }
+                    },
                   ),
                   const SizedBox(
                     height: 20,
@@ -134,7 +131,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       const SizedBox(width: 5,),
                       TextButton(
                           onPressed: () {
-                            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const SignInPage(),));
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => const SignInPage(),)
+                            );
                           },
                           child: const Text("Sign in", style: TextStyle(
                             color: Colors.black,

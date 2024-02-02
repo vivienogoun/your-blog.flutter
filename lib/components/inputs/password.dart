@@ -6,7 +6,7 @@ class PasswordInput extends StatefulWidget {
   final bool update;
 
   @override
-  _PasswordInputState createState() => _PasswordInputState();
+  State<PasswordInput> createState() => _PasswordInputState();
 }
 
 class _PasswordInputState extends State<PasswordInput> {
@@ -24,21 +24,21 @@ class _PasswordInputState extends State<PasswordInput> {
       },
       obscureText: showPassword,
       decoration: InputDecoration(
-          suffixIcon: IconButton(
-              onPressed: () {
-                setState(() {
-                  showPassword = !showPassword;
-                });
-              },
-              icon: Icon(showPassword ? Icons.visibility_off : Icons.visibility)
-          ),
-          border: const OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.grey,
-                width: 2,
-              )
-          ),
-          labelText: "Password"
+        suffixIcon: IconButton(
+          onPressed: () {
+            setState(() {
+              showPassword = !showPassword;
+            });
+          },
+          icon: Icon(showPassword ? Icons.visibility_off : Icons.visibility)
+        ),
+        border: const OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Colors.grey,
+              width: 2,
+            )
+        ),
+        labelText: "Password"
       ),
     );
   }

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:your_blog/components/inputs/email.dart';
 import 'package:your_blog/components/main-button.dart';
 import 'package:your_blog/network_handler.dart';
@@ -16,7 +15,7 @@ class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
 
   @override
-  _SignInPageState createState() => _SignInPageState();
+  State<SignInPage> createState() => _SignInPageState();
 }
 
 class _SignInPageState extends State<SignInPage> {
@@ -26,7 +25,6 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool loading = false;
   final storage = const FlutterSecureStorage();
-  var log = Logger();
 
   @override
   Widget build(BuildContext context) {
@@ -58,57 +56,60 @@ class _SignInPageState extends State<SignInPage> {
                   const SizedBox(
                     height: 20,
                   ),
-                  mainButton(
-                      context,
-                      loading,
-                      "Sign In",
-                          () async => {
-                        setState(() {
-                          loading = true;
-                        }),
-                        if (_globalKey.currentState!.validate()) {
-                          body = {
-                            "email": _emailController.text,
-                            "password": _passwordController.text,
-                          },
-                          response = await networkHandler.post("/users/login.php", body, {}),
-                          output = json.decode(response.body),
-                          if (response.statusCode == 500) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Something went wrong. Try again"),
-                                )
-                            ),
-                            setState(() {
-                              loading = false;
-                            })
-                          } else if (response.statusCode == 200) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(output["message"]),
-                                )
-                            ),
-                            await storage.write(key: "userId", value: output["user"]["userId"]),
-                            setState(() {
-                              loading = false;
-                            }),
-                            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomePage()), (route) => false)
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(output["error"]),
-                                )
-                            ),
-                            setState(() {
-                              loading = false;
-                            })
-                          },
-                        } else {
+                  MainButton(
+                    text: 'Sign In',
+                    loading: loading,
+                    onPressed: () async => {
+                      setState(() {
+                        loading = true;
+                      }),
+                      if (_globalKey.currentState!.validate()) {
+                        body = {
+                          "email": _emailController.text,
+                          "password": _passwordController.text,
+                        },
+                        response = await networkHandler.post("/users/login.php", body, {}),
+                        output = json.decode(response.body),
+                        if (response.statusCode == 500 && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Something went wrong. Try again"),
+                              )
+                          ),
                           setState(() {
                             loading = false;
                           })
-                        }
+                        } else if (response.statusCode == 200 && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(output["message"]),
+                              )
+                          ),
+                          await storage.write(key: "userId", value: output["user"]["userId"]),
+                          setState(() {
+                            loading = false;
+                          }),
+                          if (context.mounted) Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const HomePage()),
+                            (route) => false
+                          )
+                        } else {
+                          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(output["error"]),
+                              )
+                          ),
+                          setState(() {
+                            loading = false;
+                          })
+                        },
+                      } else {
+                        setState(() {
+                          loading = false;
+                        })
                       }
+                    },
                   ),
                   const SizedBox(
                     height: 20,
@@ -123,7 +124,9 @@ class _SignInPageState extends State<SignInPage> {
                       const SizedBox(width: 5,),
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const SignUpPage(),));
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => const SignUpPage(),)
+                          );
                         },
                         child: const Text("Sign up", style: TextStyle(
                           color: Colors.black,

@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:your_blog/components/cards/self_post.dart';
 import 'package:your_blog/models/user.dart';
 
@@ -20,7 +18,7 @@ class PostsScreen extends StatefulWidget {
   const PostsScreen({super.key});
 
   @override
-  _PostsScreenState createState() => _PostsScreenState();
+  State<PostsScreen> createState() => _PostsScreenState();
 }
 
 class _PostsScreenState extends State<PostsScreen> {
@@ -28,7 +26,6 @@ class _PostsScreenState extends State<PostsScreen> {
   NetworkHandler network = NetworkHandler();
   List<PostWithAuthorAndComments> allSelfPosts = [];
   List<PostWithAuthorAndComments> selfPosts = [];
-  var log = Logger();
   bool dataLoaded = false;
   bool serverError = false;
   UserModel currentUser = UserModel(email: "", fullName: "", password: "");
@@ -164,28 +161,27 @@ class _PostsScreenState extends State<PostsScreen> {
           'assets/no_data.png',
           height: MediaQuery.of(context).size.height,
         ),
-      ) : baseContainer(
-          context,
-          false,
-          const EdgeInsets.symmetric(
-            vertical: 20.0,
-            horizontal: 15.0,
-          ),
-          Column(
-            children: selfPosts.map((selfPost) => Column(
-              children: [
-                SelfPostCard(
-                  post: selfPost,
-                  onEditPost: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => NewPost(
-                          edit: true,
-                          post: selfPost.post,
-                        ))
-                    );
-                  },
-                  onDeletePost: () async {
-                    showDialog(
+      ) : BaseContainer(
+        padding: const EdgeInsets.symmetric(
+          vertical: 20.0,
+          horizontal: 15.0,
+        ),
+        white: false,
+        child: Column(
+          children: selfPosts.map((selfPost) => Column(
+            children: [
+              SelfPostCard(
+                post: selfPost,
+                onEditPost: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => NewPost(
+                        edit: true,
+                        post: selfPost.post,
+                      ))
+                  );
+                },
+                onDeletePost: () async {
+                  showDialog(
                       context: context,
                       builder: (ctx) => AlertDialog(
                         title: const Text('Notice'),
@@ -198,7 +194,7 @@ class _PostsScreenState extends State<PostsScreen> {
                             child: const Text(
                               'Cancel',
                               style: TextStyle(
-                                color: Colors.blue
+                                  color: Colors.blue
                               ),
                             ),
                           ),
@@ -211,7 +207,7 @@ class _PostsScreenState extends State<PostsScreen> {
                               Response response = await network.get('/posts/deletepost.php', {
                                 'postId': selfPost.post.postId
                               });
-                              if (response.statusCode == 200) {
+                              if (response.statusCode == 200 && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text('Successfully deleted'),
@@ -229,16 +225,16 @@ class _PostsScreenState extends State<PostsScreen> {
                           )
                         ],
                       )
-                    );
-                  },
-                ),
-                const SizedBox(
-                  height: 20.0,
-                )
-              ],
-            )).toList(),
-          )
-      ),
+                  );
+                },
+              ),
+              const SizedBox(
+                height: 20.0,
+              )
+            ],
+          )).toList(),
+        ),
+      )
     );
   }
 }

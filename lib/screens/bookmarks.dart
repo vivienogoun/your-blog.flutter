@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:your_blog/components/cards/favorite_post.dart';
 import 'package:your_blog/models/user.dart';
 
@@ -20,7 +18,7 @@ class BookmarksScreen extends StatefulWidget {
   const BookmarksScreen({super.key});
 
   @override
-  _BookmarksScreenState createState() => _BookmarksScreenState();
+  State<BookmarksScreen> createState() => _BookmarksScreenState();
 }
 
 class _BookmarksScreenState extends State<BookmarksScreen> {
@@ -28,8 +26,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   NetworkHandler network = NetworkHandler();
   List<PostWithUser> allFavoritesPosts = [];
   List<PostWithUser> favoritesPosts = [];
-  var log = Logger();
   bool dataLoaded = false;
+  bool serverError = false;
   UserModel currentUser = UserModel(email: "", fullName: "", password: "");
 
   @override
@@ -43,6 +41,12 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
     Response response1 = await network.get("/users/user.php", {
       "userId": userId
     });
+    if (response1.statusCode == 500) {
+      setState(() {
+        serverError = true;
+      });
+      return;
+    }
     UserModel user = UserModel.fromJson(json.decode(response1.body));
     setState(() {
       currentUser = user;
@@ -116,7 +120,26 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           },
           child: const Icon(Icons.edit_note, size: 32,)
       ),
-      body: !dataLoaded ? const Center(
+      body: serverError
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Something went wrong'),
+            const Text('Check your internet connection'),
+            TextButton(
+              child: const Text('Refresh'),
+              onPressed: () {
+                setState(() {
+                  serverError = false;
+                  getData();
+                });
+              },
+            )
+          ],
+        ),
+      )
+      : !dataLoaded ? const Center(
         child: CircularProgressIndicator(
           color: Colors.black54,
         ),
@@ -126,46 +149,46 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           'assets/no_data.png',
           height: MediaQuery.of(context).size.height,
         ),
-      ) : baseContainer(
-          context,
-          false,
-          const EdgeInsets.symmetric(
-            vertical: 20.0,
-            horizontal: 15.0,
-          ),
-          Column(
-            children: favoritesPosts.map((postWithUser) => Column(
-              children: [
-                FavoritePostCard(
-                  postWithUser: postWithUser,
-                  removePost: () async {
-                    setState(() {
-                      dataLoaded = false;
-                    });
-                    Map<String, dynamic> body = {
-                      "email": currentUser.email,
-                      "fullName": currentUser.fullName,
-                      "username": currentUser.username,
-                      "phoneNumber": currentUser.phoneNumber,
-                      "bio": currentUser.bio,
-                      "avatarUrl": currentUser.avatarUrl,
-                      "favoritesPosts": setFavoritesPosts(currentUser.favoritesPosts!, postWithUser.post.postId!),
-                      "followers": currentUser.followers,
-                      "password": currentUser.password
-                    };
-                    await network.post("/users/updateuser.php", body, {
-                      "userId": currentUser.userId,
-                    });
-                    getData();
-                  },
-                ),
-                const SizedBox(
-                  height: 20.0,
-                )
-              ],
-            )).toList(),
-          )
-      ),
+      )
+          : BaseContainer(
+        padding: const EdgeInsets.symmetric(
+          vertical: 20.0,
+          horizontal: 15.0,
+        ),
+        white: false,
+        child: Column(
+          children: favoritesPosts.map((postWithUser) => Column(
+            children: [
+              FavoritePostCard(
+                postWithUser: postWithUser,
+                removePost: () async {
+                  setState(() {
+                    dataLoaded = false;
+                  });
+                  Map<String, dynamic> body = {
+                    "email": currentUser.email,
+                    "fullName": currentUser.fullName,
+                    "username": currentUser.username,
+                    "phoneNumber": currentUser.phoneNumber,
+                    "bio": currentUser.bio,
+                    "avatarUrl": currentUser.avatarUrl,
+                    "favoritesPosts": setFavoritesPosts(currentUser.favoritesPosts!, postWithUser.post.postId!),
+                    "followers": currentUser.followers,
+                    "password": currentUser.password
+                  };
+                  await network.post("/users/updateuser.php", body, {
+                    "userId": currentUser.userId,
+                  });
+                  getData();
+                },
+              ),
+              const SizedBox(
+                height: 20.0,
+              )
+            ],
+          )).toList(),
+        ),
+      )
     );
   }
 }

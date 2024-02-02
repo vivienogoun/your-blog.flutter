@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:your_blog/components/base_container.dart';
-import 'package:your_blog/components/comment_card.dart';
+import 'package:your_blog/components/cards/comment.dart';
 import 'package:your_blog/components/inputs/comment.dart';
 import 'package:your_blog/models/comment.dart';
 
@@ -18,7 +17,7 @@ class CommentsPage extends StatefulWidget {
   final String postId;
 
   @override
-  _CommentsPageState createState() => _CommentsPageState();
+  State<CommentsPage> createState() => _CommentsPageState();
 }
 
 class _CommentsPageState extends State<CommentsPage> {
@@ -26,7 +25,6 @@ class _CommentsPageState extends State<CommentsPage> {
   UserModel user = UserModel(email: "", fullName: "", password: "");
   NetworkHandler network = NetworkHandler();
   List<CommentWithAuthor> comments = [];
-  var log = Logger();
   bool dataLoaded = false;
   bool serverError = false;
   final TextEditingController _commentController = TextEditingController();
@@ -59,19 +57,19 @@ class _CommentsPageState extends State<CommentsPage> {
       (json.decode(response2.body) as List).map(
               (e) => CommentModel.fromJson(e)
       ).toList().forEach(
-              (comment) async {
-                Response response = await network.get('/users/user.php', {
-                  'userId': comment.userId
-                });
-                setState(() {
-                  comments.add(
-                    CommentWithAuthor(
-                        comment: comment,
-                        author: UserModel.fromJson(json.decode(response.body))
-                    )
-                  );
-                });
-              }
+        (comment) async {
+          Response response = await network.get('/users/user.php', {
+            'userId': comment.userId
+          });
+          setState(() {
+            comments.add(
+              CommentWithAuthor(
+                  comment: comment,
+                  author: UserModel.fromJson(json.decode(response.body))
+              )
+            );
+          });
+        }
       );
       setState(() {
         dataLoaded = true;
@@ -168,37 +166,36 @@ class _CommentsPageState extends State<CommentsPage> {
               height: MediaQuery.of(context).size.height,
             ),
           )
-          : baseContainer(
-            context,
-            true,
-            const EdgeInsets.symmetric(
-              vertical: 20.0,
-              horizontal: 15.0,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                bottom: 40.0,
-              ),
-              child: Column(
-                children: comments.map((comment) => Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 20.0,
-                          horizontal: 0.0
-                      ),
-                      child: CommentCard(comment: comment),
-                    ),
-                    Container(
-                      height: 1,
-                      decoration: const BoxDecoration(
-                          color: Colors.grey
-                      ),
-                    ),
-                  ],
-                )).toList(),
-              ),
-            )
+          : BaseContainer(
+        padding: const EdgeInsets.symmetric(
+          vertical: 20.0,
+          horizontal: 15.0,
+        ),
+        white: true,
+        child: Padding(
+          padding: const EdgeInsets.only(
+            bottom: 40.0,
+          ),
+          child: Column(
+            children: comments.map((comment) => Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 20.0,
+                      horizontal: 0.0
+                  ),
+                  child: CommentCard(comment: comment),
+                ),
+                Container(
+                  height: 1,
+                  decoration: const BoxDecoration(
+                      color: Colors.grey
+                  ),
+                ),
+              ],
+            )).toList(),
+          ),
+        ),
       )
     );
   }
